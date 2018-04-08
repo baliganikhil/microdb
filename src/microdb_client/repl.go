@@ -8,15 +8,10 @@ import (
 	"strings"
 )
 
-const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "7188"
-	CONN_TYPE = "tcp"
-)
-
 func main() {
 	conn := connectToServer()
 	printWelcome()
+	setupClientInterruptHandler(conn)
 	runRepl(conn)
 }
 
@@ -29,7 +24,7 @@ func runRepl(conn net.Conn) {
 		// fmt.Println(input)
 
 		if input == "exit" || input == "quit" {
-			cleanUpClientAndExit()
+			cleanUpClientAndExit(conn)
 		} else if input == "" {
 			// printPrompt()
 		} else if input == "show dbs" {
@@ -77,11 +72,4 @@ func connectToServer() net.Conn {
 	}
 
 	return conn
-}
-
-func cleanUpClientAndExit() {
-	fmt.Println()
-	fmt.Println("Thank you for using MicroDB")
-	fmt.Println()
-	os.Exit(0)
 }
