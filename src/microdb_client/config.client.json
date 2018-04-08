@@ -1,0 +1,7 @@
+{
+    "connection_info": {
+        "host": "localhost",
+        "port": "7188",
+        "connection_type": "tcp"
+    }
+}
