@@ -7,20 +7,26 @@ import (
 	"os"
 )
 
+const (
+	Delimiter = '\r'
+)
+
 func main() {
 	config := GetServerConfig()
-	CONN_HOST := config.ConnectionInfo.Host
-	CONN_PORT := config.ConnectionInfo.Port
-	CONN_TYPE := config.ConnectionInfo.ConnType
+	connHost := config.ConnectionInfo.Host
+	connPort := config.ConnectionInfo.Port
+	connType := config.ConnectionInfo.ConnType
 
-	var l, err = net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	initDB()
+
+	var l, err = net.Listen(connType, connHost+":"+connPort)
 
 	if err != nil {
 		serverStartError(err)
 	}
 
 	defer l.Close()
-	fmt.Println("MicroDB Server started... Listening at " + CONN_HOST + ":" + CONN_PORT)
+	fmt.Println("MicroDB Server started... Listening at " + connHost + ":" + connPort)
 
 	setupServerInterruptHandler()
 	setupRequestHandler(l)
@@ -50,33 +56,30 @@ func connAcceptError(err error) {
 }
 
 func handleRequest(conn net.Conn) {
-	// Make a buffer to hold incoming data.
-	// buf := make([]byte, 1024)
-
-	// Read the incoming connection into the buffer.
-	// message, err := conn.Read(buf)
+	fmt.Println("Handling request")
 	message, err := bufio.NewReader(conn).ReadString('\n')
 
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
-		os.Exit(1)
+		return
 	}
 
 	fmt.Println("Command: " + message + "\n")
 
-	//
 	if message == "show dbs\n" {
 		listDbs(conn)
 	} else {
 		conn.Write([]byte("Unrecognised command\n"))
 	}
-
-	// Send a response back to person contacting us.
-
-	// Close the connection when you're done with it.
-	// conn.Close()
 }
 
 func listDbs(conn net.Conn) {
-	conn.Write([]byte("nimbus\ntest\n"))
+	dbs := getDBInfo().DBs
+
+	for _, db := range dbs {
+		conn.Write([]byte(db.Name + "\n"))
+	}
+
+	conn.Write([]byte(string(Delimiter)))
+
 }

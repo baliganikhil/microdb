@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	Delimiter = '\r'
+)
+
 func main() {
 	conn := connectToServer()
 	printWelcome()
@@ -52,8 +56,8 @@ func showDbs(conn net.Conn) {
 	fmt.Println("---------------")
 	conn.Write([]byte("show dbs\n"))
 
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print(message)
+	message, _ := bufio.NewReader(conn).ReadString(Delimiter)
+	fmt.Println(message)
 }
 
 func showTables(conn net.Conn) {
