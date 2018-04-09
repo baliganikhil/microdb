@@ -56,20 +56,22 @@ func connAcceptError(err error) {
 }
 
 func handleRequest(conn net.Conn) {
-	fmt.Println("Handling request")
-	message, err := bufio.NewReader(conn).ReadString('\n')
+	for {
+		fmt.Println("Handling request")
+		message, err := bufio.NewReader(conn).ReadString('\n')
 
-	if err != nil {
-		fmt.Println("Error reading:", err.Error())
-		return
-	}
+		if err != nil {
+			fmt.Println("Error reading:", err.Error())
+			return
+		}
 
-	fmt.Println("Command: " + message + "\n")
+		fmt.Println("Command: " + message + "\n")
 
-	if message == "show dbs\n" {
-		listDbs(conn)
-	} else {
-		conn.Write([]byte("Unrecognised command\n"))
+		if message == "show dbs\n" {
+			listDbs(conn)
+		} else {
+			conn.Write([]byte("Unrecognised command\n"))
+		}
 	}
 }
 
