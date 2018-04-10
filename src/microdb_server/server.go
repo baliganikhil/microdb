@@ -1,12 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"microdb_common"
 	"net"
 	"os"
-	"strings"
 )
 
 const (
@@ -55,31 +52,4 @@ func serverStartError(err error) {
 func connAcceptError(err error) {
 	fmt.Println("Could not accept connection", err.Error())
 	os.Exit(1)
-}
-
-func handleRequest(conn net.Conn) {
-	for {
-		fmt.Println("Handling request")
-		message, err := bufio.NewReader(conn).ReadString('\n')
-
-		if err != nil {
-			fmt.Println("Error reading:", err.Error())
-			return
-		}
-
-		fmt.Println("Command: " + message + "\n")
-		message = strings.Trim(message, "\n")
-
-		c := getCommand(message)
-		fmt.Println("Command: " + c.Command + "\n")
-
-		// if message == "show dbs" {
-		if microdbCommon.SHOW_DBS == c.Command {
-			listDbs(conn)
-		} else if message == "show tables" {
-			// listTables(conn)
-		} else {
-			conn.Write([]byte("Unrecognised command\n"))
-		}
-	}
 }

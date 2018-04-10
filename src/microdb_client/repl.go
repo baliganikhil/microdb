@@ -12,6 +12,8 @@ const (
 	Delimiter = '\r'
 )
 
+var curDBName = "test"
+
 func main() {
 	conn := connectToServer()
 	printWelcome()

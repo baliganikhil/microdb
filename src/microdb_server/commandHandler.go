@@ -15,8 +15,20 @@ func listDbs(conn net.Conn) {
 	dbs := getDBInfo().DBs
 
 	for _, db := range dbs {
-		conn.Write([]byte(db.Name + "\n"))
+		dbName := db.Name
+		if db.IsActive {
+			dbName += " [active]"
+		}
+
+		sendResponse(conn, dbName+"\n")
 	}
 
-	conn.Write([]byte(string(Delimiter)))
+	sendResponse(conn, string(Delimiter))
+}
+
+func listTables(conn net.Conn) {}
+
+func useDB(conn net.Conn, params microdbCommon.Command) {
+	dbName := params.Params.(string)
+	sendResponse(conn, dbName)
 }

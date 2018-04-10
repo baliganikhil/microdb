@@ -29,6 +29,7 @@ func initDB() {
     "dbs": [
         {
             "name": "test",
+			"isActive": true,
             "tables": []
         }
     ]
