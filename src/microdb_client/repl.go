@@ -25,18 +25,14 @@ func runRepl(conn net.Conn) {
 		reader := bufio.NewReader(os.Stdin)
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
-		// fmt.Println(input)
 
 		if input == "exit" || input == "quit" {
 			cleanUpClientAndExit(conn)
-		} else if input == "" {
-			// printPrompt()
 		} else if input == "show dbs" {
-			showDbs(conn)
-		} else if input == "show tables" || input == "show collections" {
-			showTables(conn)
+			sendToServer(conn, ListDBs())
 		} else {
-			fmt.Println("Unrecognised command")
+			// fmt.Println("Unrecognised command")
+			sendToServer(conn, input)
 		}
 
 		printPrompt()
@@ -51,10 +47,10 @@ func printWelcome() {
 	fmt.Println("Welcome to MicroDB - By Nikhil Baliga")
 }
 
-func showDbs(conn net.Conn) {
-	fmt.Println("Listing DBs")
-	fmt.Println("---------------")
-	conn.Write([]byte("show dbs\n"))
+func sendToServer(conn net.Conn, cmd string) {
+	// fmt.Println("Listing DBs")
+	// fmt.Println("---------------")
+	conn.Write([]byte(cmd + "\n"))
 
 	message, _ := bufio.NewReader(conn).ReadString(Delimiter)
 	fmt.Println(message)

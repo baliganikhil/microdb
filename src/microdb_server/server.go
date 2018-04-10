@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"microdb_common"
 	"net"
 	"os"
+	"strings"
 )
 
 const (
@@ -66,22 +68,18 @@ func handleRequest(conn net.Conn) {
 		}
 
 		fmt.Println("Command: " + message + "\n")
+		message = strings.Trim(message, "\n")
 
-		if message == "show dbs\n" {
+		c := getCommand(message)
+		fmt.Println("Command: " + c.Command + "\n")
+
+		// if message == "show dbs" {
+		if microdbCommon.SHOW_DBS == c.Command {
 			listDbs(conn)
+		} else if message == "show tables" {
+			// listTables(conn)
 		} else {
 			conn.Write([]byte("Unrecognised command\n"))
 		}
 	}
-}
-
-func listDbs(conn net.Conn) {
-	dbs := getDBInfo().DBs
-
-	for _, db := range dbs {
-		conn.Write([]byte(db.Name + "\n"))
-	}
-
-	conn.Write([]byte(string(Delimiter)))
-
 }
