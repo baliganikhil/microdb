@@ -1,6 +1,6 @@
 {
     "folders": {
-        "data": ""
+        "data": "/Users/nik/Programming/microdb/data"
     },
     "connection_info": {
         "host": "localhost",

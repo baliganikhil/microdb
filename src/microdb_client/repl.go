@@ -9,14 +9,13 @@ import (
 )
 
 const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "7188"
-	CONN_TYPE = "tcp"
+	Delimiter = '\r'
 )
 
 func main() {
 	conn := connectToServer()
 	printWelcome()
+	setupClientInterruptHandler(conn)
 	runRepl(conn)
 }
 
@@ -26,18 +25,14 @@ func runRepl(conn net.Conn) {
 		reader := bufio.NewReader(os.Stdin)
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
-		// fmt.Println(input)
 
 		if input == "exit" || input == "quit" {
-			cleanUpClientAndExit()
-		} else if input == "" {
-			// printPrompt()
+			cleanUpClientAndExit(conn)
 		} else if input == "show dbs" {
-			showDbs(conn)
-		} else if input == "show tables" || input == "show collections" {
-			showTables(conn)
+			sendToServer(conn, ListDBs())
 		} else {
-			fmt.Println("Unrecognised command")
+			// fmt.Println("Unrecognised command")
+			sendToServer(conn, input)
 		}
 
 		printPrompt()
@@ -52,13 +47,13 @@ func printWelcome() {
 	fmt.Println("Welcome to MicroDB - By Nikhil Baliga")
 }
 
-func showDbs(conn net.Conn) {
-	fmt.Println("Listing DBs")
-	fmt.Println("---------------")
-	conn.Write([]byte("show dbs\n"))
+func sendToServer(conn net.Conn, cmd string) {
+	// fmt.Println("Listing DBs")
+	// fmt.Println("---------------")
+	conn.Write([]byte(cmd + "\n"))
 
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print(message)
+	message, _ := bufio.NewReader(conn).ReadString(Delimiter)
+	fmt.Println(message)
 }
 
 func showTables(conn net.Conn) {
@@ -77,11 +72,4 @@ func connectToServer() net.Conn {
 	}
 
 	return conn
-}
-
-func cleanUpClientAndExit() {
-	fmt.Println()
-	fmt.Println("Thank you for using MicroDB")
-	fmt.Println()
-	os.Exit(0)
 }
