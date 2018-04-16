@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"microdb_common"
 	"net"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 func getCommand(cmdJSON string) microdbCommon.Command {
@@ -11,12 +14,93 @@ func getCommand(cmdJSON string) microdbCommon.Command {
 	return c
 }
 
-func listDbs(conn net.Conn) {
+func listDbs(conn net.Conn, command string) {
 	dbs := getDBInfo().DBs
+	var dbList []string
 
 	for _, db := range dbs {
-		conn.Write([]byte(db.Name + "\n"))
+		dbName := db.Name
+		dbList = append(dbList, dbName)
 	}
 
-	conn.Write([]byte(string(Delimiter)))
+	dbResponse := microdbCommon.DBListResponse{DBs: dbList}
+	dbListJson, _ := json.Marshal(dbResponse)
+
+	sendCommandResponse(conn, command, string(dbListJson))
+}
+
+func listTables(conn net.Conn, command microdbCommon.Command) {
+	dbInfo := getDBInfo()
+	var tableList []string
+
+	var cmdListTables microdbCommon.CmdListTables
+	mapstructure.Decode(command.Params, &cmdListTables)
+
+	dbName := cmdListTables.DB
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+				tableList = append(tableList, table.Name)
+			}
+		}
+	}
+
+	tableResponse := microdbCommon.TableListResponse{Tables: tableList}
+	tableListJson, _ := json.Marshal(tableResponse)
+
+	// sendResponse(conn, strings.Join(tableList, "\n"))
+	sendCommandResponse(conn, command.Command, string(tableListJson))
+}
+
+func useDB(conn net.Conn, params microdbCommon.Command) {
+	dbName := params.Params.(string)
+	sendResponse(conn, dbName)
+}
+
+func createTable(conn net.Conn, command microdbCommon.Command) {
+	var tableInfo microdbCommon.CmdCreateTable
+	mapstructure.Decode(command.Params, &tableInfo)
+
+	dbName := tableInfo.DB
+	tableName := tableInfo.TableName
+
+	dbInfo := getDBInfo()
+	tableFound := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+
+				if table.Name == tableName {
+					tableFound = true
+					break
+				}
+			}
+
+			if !tableFound {
+				db.Tables = append(db.Tables, Table{Name: tableName})
+				setDBInfo(dbInfo)
+			}
+
+		}
+
+		if tableFound {
+			break
+		}
+	}
+
+	if !tableFound {
+		sendResponse(conn, "Table "+tableName+" has been successfully created")
+	} else {
+		sendResponse(conn, "Table "+tableName+" already exists")
+	}
 }

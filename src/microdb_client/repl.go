@@ -12,6 +12,8 @@ const (
 	Delimiter = '\r'
 )
 
+var curDBName = "test"
+
 func main() {
 	conn := connectToServer()
 	printWelcome()
@@ -28,11 +30,8 @@ func runRepl(conn net.Conn) {
 
 		if input == "exit" || input == "quit" {
 			cleanUpClientAndExit(conn)
-		} else if input == "show dbs" {
-			sendToServer(conn, ListDBs())
 		} else {
-			// fmt.Println("Unrecognised command")
-			sendToServer(conn, input)
+			sendToServer(conn, commandParser(input).ToJson())
 		}
 
 		printPrompt()
@@ -53,7 +52,7 @@ func sendToServer(conn net.Conn, cmd string) {
 	conn.Write([]byte(cmd + "\n"))
 
 	message, _ := bufio.NewReader(conn).ReadString(Delimiter)
-	fmt.Println(message)
+	handleResponse(message)
 }
 
 func showTables(conn net.Conn) {
