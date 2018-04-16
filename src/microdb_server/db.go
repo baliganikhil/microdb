@@ -61,3 +61,15 @@ func getDBInfo() DBInfo {
 	json.Unmarshal(raw, &c)
 	return c
 }
+
+func setDBInfo(dbInfo DBInfo) {
+	fmt.Println("Saving DB Info")
+	dbFilename := getDBFilename()
+	dbInfoS, _ := json.Marshal(dbInfo)
+
+	err := ioutil.WriteFile(dbFilename, dbInfoS, 0666)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}

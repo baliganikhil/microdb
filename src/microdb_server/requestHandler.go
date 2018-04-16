@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"microdb_common"
 	"net"
@@ -22,21 +23,27 @@ func handleRequest(conn net.Conn) {
 		message = strings.Trim(message, "\n")
 
 		c := getCommand(message)
-		fmt.Println("Command: " + c.Command + "\n")
 
 		// if message == "show dbs" {
 		if microdbCommon.SHOW_DBS == c.Command {
-			listDbs(conn)
+			listDbs(conn, microdbCommon.SHOW_DBS)
 		} else if microdbCommon.SHOW_TABLES == c.Command {
-			listTables(conn)
+			listTables(conn, c)
 		} else if microdbCommon.USE_DB == c.Command {
 			useDB(conn, c)
+		} else if microdbCommon.CREATE_TABLE == c.Command {
+			createTable(conn, c)
 		} else {
-			conn.Write([]byte("Unrecognised command\n"))
+			sendResponse(conn, "Unrecognised command")
 		}
 	}
 }
 
+func sendCommandResponse(conn net.Conn, cmd string, response string) {
+	serverResponse, _ := json.Marshal(microdbCommon.ServerResponse{Command: cmd, Response: response})
+	sendResponse(conn, string(serverResponse))
+}
+
 func sendResponse(conn net.Conn, response string) {
-	conn.Write([]byte(string(Delimiter)))
+	conn.Write([]byte(response + string(Delimiter)))
 }
