@@ -99,9 +99,9 @@ func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 	}
 
 	if !tableFound {
-		sendResponse(conn, "Table "+tableName+" has been successfully created")
+		sendCommandResponse(conn, command.Command, "Table "+tableName+" has been successfully created")
 	} else {
-		sendResponse(conn, "Table "+tableName+" already exists")
+		sendCommandResponse(conn, command.Command, "Table "+tableName+" already exists")
 	}
 }
 
