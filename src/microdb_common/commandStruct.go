@@ -1,8 +1,14 @@
 package microdbCommon
 
+type CmdShowDbs struct{}
+
 type CmdCreateTable struct {
 	DB        string `json:"db"`
 	TableName string `json:"tableName"`
+}
+
+type CmdCreateDB struct {
+	DB string `json:"db"`
 }
 
 type CmdListTables struct {

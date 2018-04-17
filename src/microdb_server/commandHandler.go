@@ -29,6 +29,33 @@ func handle_SHOW_DBS(conn net.Conn, command microdbCommon.Command) {
 	sendCommandResponse(conn, command.Command, string(dbListJson))
 }
 
+func handle_CREATE_DB(conn net.Conn, command microdbCommon.Command) {
+	dbInfo := getDBInfo()
+
+	var cmdCreateDB microdbCommon.CmdCreateDB
+	mapstructure.Decode(command.Params, &cmdCreateDB)
+
+	dbName := cmdCreateDB.DB
+	dbFound := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbFound = true
+		}
+	}
+
+	if !dbFound {
+		dbInfo.DBs = append(dbInfo.DBs, Database{Name: dbName})
+		setDBInfo(dbInfo)
+		sendCommandResponse(conn, command.Command, "Database "+dbName+" has been created")
+	} else {
+		sendCommandResponse(conn, command.Command, "Database "+dbName+" already exists")
+	}
+
+}
+
 func handle_SHOW_TABLES(conn net.Conn, command microdbCommon.Command) {
 	dbInfo := getDBInfo()
 	var tableList []string
@@ -53,7 +80,6 @@ func handle_SHOW_TABLES(conn net.Conn, command microdbCommon.Command) {
 	tableResponse := microdbCommon.TableListResponse{Tables: tableList}
 	tableListJson, _ := json.Marshal(tableResponse)
 
-	// sendResponse(conn, strings.Join(tableList, "\n"))
 	sendCommandResponse(conn, command.Command, string(tableListJson))
 }
 

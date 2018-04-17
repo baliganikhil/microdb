@@ -2,11 +2,16 @@ package main
 
 import (
 	"microdb_common"
-	"net"
 	"regexp"
 )
 
 func commandParser(input string) microdbCommon.Command {
+
+	// Check if create db
+	createDBRegex, _ := regexp.Compile("create[ ]+db[ ]+([a-zA-Z0-9]+)")
+	if createDBRegex.MatchString(input) {
+		return parse_CREATE_DB(input, createDBRegex)
+	}
 
 	// Check if create table
 	createTableRegex, _ := regexp.Compile("db\\.([a-zA-Z0-9]+)\\.create\\(\\)")
@@ -41,6 +46,14 @@ func commandParser(input string) microdbCommon.Command {
 	return microdbCommon.Command{}
 }
 
+func parse_CREATE_DB(input string, createDBRegex *regexp.Regexp) microdbCommon.Command {
+	matches := createDBRegex.FindStringSubmatch(input)
+	dbName := matches[1]
+	dbInfo := microdbCommon.CmdCreateDB{DB: dbName}
+
+	return microdbCommon.CreateCommand(microdbCommon.CREATE_DB, dbInfo)
+}
+
 func parse_CREATE_TABLE(input string, createTableRegex *regexp.Regexp) microdbCommon.Command {
 	matches := createTableRegex.FindStringSubmatch(input)
 	tableName := matches[1]
@@ -50,7 +63,7 @@ func parse_CREATE_TABLE(input string, createTableRegex *regexp.Regexp) microdbCo
 }
 
 func parse_SHOW_DBS(input string, showDBsRegex *regexp.Regexp) microdbCommon.Command {
-	return microdbCommon.CreateCommand(microdbCommon.SHOW_DBS, "")
+	return microdbCommon.CreateCommand(microdbCommon.SHOW_DBS, microdbCommon.CmdShowDbs{})
 }
 
 func parse_SHOW_TABLES(input string, showTablesRegex *regexp.Regexp) microdbCommon.Command {
@@ -79,8 +92,4 @@ func setDB(db string) {
 
 func getDB() string {
 	return curDBName
-}
-
-func createTable(conn net.Conn) {
-
 }

@@ -25,6 +25,8 @@ func handleRequest(conn net.Conn) {
 
 		c := getCommand(message)
 
+		Log.Println(c.ToJson())
+
 		if microdbCommon.SHOW_DBS == c.Command {
 			handle_SHOW_DBS(conn, c)
 		} else if microdbCommon.SHOW_TABLES == c.Command {
@@ -33,6 +35,8 @@ func handleRequest(conn net.Conn) {
 			handle_DB_EXISTS(conn, c)
 		} else if microdbCommon.DB_EXISTS == c.Command {
 			handle_DB_EXISTS(conn, c)
+		} else if microdbCommon.CREATE_DB == c.Command {
+			handle_CREATE_DB(conn, c)
 		} else if microdbCommon.CREATE_TABLE == c.Command {
 			handle_CREATE_TABLE(conn, c)
 		} else {
