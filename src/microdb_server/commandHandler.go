@@ -14,7 +14,7 @@ func getCommand(cmdJSON string) microdbCommon.Command {
 	return c
 }
 
-func listDbs(conn net.Conn, command string) {
+func handle_SHOW_DBS(conn net.Conn, command microdbCommon.Command) {
 	dbs := getDBInfo().DBs
 	var dbList []string
 
@@ -26,10 +26,10 @@ func listDbs(conn net.Conn, command string) {
 	dbResponse := microdbCommon.DBListResponse{DBs: dbList}
 	dbListJson, _ := json.Marshal(dbResponse)
 
-	sendCommandResponse(conn, command, string(dbListJson))
+	sendCommandResponse(conn, command.Command, string(dbListJson))
 }
 
-func listTables(conn net.Conn, command microdbCommon.Command) {
+func handle_SHOW_TABLES(conn net.Conn, command microdbCommon.Command) {
 	dbInfo := getDBInfo()
 	var tableList []string
 
@@ -62,7 +62,7 @@ func useDB(conn net.Conn, params microdbCommon.Command) {
 	sendResponse(conn, dbName)
 }
 
-func createTable(conn net.Conn, command microdbCommon.Command) {
+func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 	var tableInfo microdbCommon.CmdCreateTable
 	mapstructure.Decode(command.Params, &tableInfo)
 
@@ -105,7 +105,7 @@ func createTable(conn net.Conn, command microdbCommon.Command) {
 	}
 }
 
-func dbExists(conn net.Conn, command microdbCommon.Command) {
+func handle_DB_EXISTS(conn net.Conn, command microdbCommon.Command) {
 	var cmdDbExists microdbCommon.CmdDBExists
 	mapstructure.Decode(command.Params, &cmdDbExists)
 

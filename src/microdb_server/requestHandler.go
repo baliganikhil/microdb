@@ -16,6 +16,7 @@ func handleRequest(conn net.Conn) {
 
 		if err != nil {
 			fmt.Println("Error reading:", err.Error())
+			sendResponse(conn, "ERROR 501: Something went wrong while trying to read request\n"+err.Error())
 			return
 		}
 
@@ -24,17 +25,16 @@ func handleRequest(conn net.Conn) {
 
 		c := getCommand(message)
 
-		// if message == "show dbs" {
 		if microdbCommon.SHOW_DBS == c.Command {
-			listDbs(conn, microdbCommon.SHOW_DBS)
+			handle_SHOW_DBS(conn, c)
 		} else if microdbCommon.SHOW_TABLES == c.Command {
-			listTables(conn, c)
+			handle_SHOW_TABLES(conn, c)
 		} else if microdbCommon.DB_EXISTS_USE_DB == c.Command {
-			dbExists(conn, c)
+			handle_DB_EXISTS(conn, c)
 		} else if microdbCommon.DB_EXISTS == c.Command {
-			dbExists(conn, c)
+			handle_DB_EXISTS(conn, c)
 		} else if microdbCommon.CREATE_TABLE == c.Command {
-			createTable(conn, c)
+			handle_CREATE_TABLE(conn, c)
 		} else {
 			sendCommandResponse(conn, c.Command, "Unrecognised command")
 		}
