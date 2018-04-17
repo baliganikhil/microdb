@@ -9,6 +9,10 @@ type CmdListTables struct {
 	DB string `json:"db"`
 }
 
+type CmdDBExists struct {
+	DB string `json:"db"`
+}
+
 type ServerResponse struct {
 	Command  string      `json:"command"`
 	Response interface{} `json:"response"`
@@ -20,4 +24,9 @@ type DBListResponse struct {
 
 type TableListResponse struct {
 	Tables []string `json:"tables"`
+}
+
+type DBExistsResponse struct {
+	DB     string `json:"db"`
+	Exists bool   `json:"exists"`
 }

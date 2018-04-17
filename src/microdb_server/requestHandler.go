@@ -29,12 +29,14 @@ func handleRequest(conn net.Conn) {
 			listDbs(conn, microdbCommon.SHOW_DBS)
 		} else if microdbCommon.SHOW_TABLES == c.Command {
 			listTables(conn, c)
-		} else if microdbCommon.USE_DB == c.Command {
-			useDB(conn, c)
+		} else if microdbCommon.DB_EXISTS_USE_DB == c.Command {
+			dbExists(conn, c)
+		} else if microdbCommon.DB_EXISTS == c.Command {
+			dbExists(conn, c)
 		} else if microdbCommon.CREATE_TABLE == c.Command {
 			createTable(conn, c)
 		} else {
-			sendResponse(conn, "Unrecognised command")
+			sendCommandResponse(conn, c.Command, "Unrecognised command")
 		}
 	}
 }

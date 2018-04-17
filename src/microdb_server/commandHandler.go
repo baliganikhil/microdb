@@ -104,3 +104,27 @@ func createTable(conn net.Conn, command microdbCommon.Command) {
 		sendResponse(conn, "Table "+tableName+" already exists")
 	}
 }
+
+func dbExists(conn net.Conn, command microdbCommon.Command) {
+	var cmdDbExists microdbCommon.CmdDBExists
+	mapstructure.Decode(command.Params, &cmdDbExists)
+
+	dbName := cmdDbExists.DB
+	dbInfo := getDBInfo()
+	dbFound := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbFound = true
+			break
+		}
+	}
+
+	dbExistsResponse := microdbCommon.DBExistsResponse{DB: dbName, Exists: dbFound}
+	dbExistsResponseJson, _ := json.Marshal(dbExistsResponse)
+
+	sendCommandResponse(conn, command.Command, string(dbExistsResponseJson))
+
+}

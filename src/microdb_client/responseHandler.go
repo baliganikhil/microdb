@@ -34,6 +34,27 @@ func handleResponse(responseIn string) {
 			fmt.Println(table)
 		}
 
+	} else if serverResponse.Command == microdbCommon.DB_EXISTS {
+		var responseJson microdbCommon.DBExistsResponse
+		json.Unmarshal([]byte(serverResponse.Response.(string)), &responseJson)
+
+		if responseJson.Exists {
+			fmt.Println("DB '" + responseJson.DB + "' exists")
+		} else {
+			fmt.Println("DB '" + responseJson.DB + "' does not exist")
+		}
+
+	} else if serverResponse.Command == microdbCommon.DB_EXISTS_USE_DB {
+		var responseJson microdbCommon.DBExistsResponse
+		json.Unmarshal([]byte(serverResponse.Response.(string)), &responseJson)
+
+		if responseJson.Exists {
+			setDB(responseJson.DB)
+			fmt.Println("DB '" + responseJson.DB + "' is now active")
+		} else {
+			fmt.Println("DB '" + responseJson.DB + "' does not exist")
+		}
+
 	} else {
 		fmt.Println(serverResponse.Response)
 	}
