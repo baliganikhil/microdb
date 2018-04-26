@@ -19,6 +19,11 @@ type CmdDropDb struct {
 	DB string `json:"db"`
 }
 
+type CmdDropTable struct {
+	DB        string `json:"db"`
+	TableName string `json:"tableName"`
+}
+
 type CmdDBExists struct {
 	DB string `json:"db"`
 }
@@ -44,4 +49,10 @@ type DBExistsResponse struct {
 type DropDBResponse struct {
 	DB      string `json:"db"`
 	Dropped bool   `json:"dropped"`
+}
+
+type DropTableResponse struct {
+	DB        string `json:"db"`
+	TableName string `json:"tableName"`
+	Dropped   bool   `json:"dropped"`
 }

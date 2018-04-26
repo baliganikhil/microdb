@@ -179,3 +179,36 @@ func handle_DROP_DB(conn net.Conn, command microdbCommon.Command) {
 
 	sendCommandResponse(conn, command.Command, string(dbDropResponseJson))
 }
+
+func handle_DROP_TABLE(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropTable microdbCommon.CmdDropTable
+	mapstructure.Decode(command.Params, &cmdDropTable)
+
+	dbName := cmdDropTable.DB
+	tableName := cmdDropTable.TableName
+	dbInfo := getDBInfo()
+	tableDropped := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+
+				if table.Name == tableName {
+					db.Tables = append(db.Tables[0:tableIndex], db.Tables[tableIndex+1:]...)
+					tableDropped = true
+					setDBInfo(dbInfo)
+					break
+				}
+
+			}
+		}
+	}
+
+	tableDropResponse := microdbCommon.DropTableResponse{DB: dbName, TableName: tableName, Dropped: tableDropped}
+	tableDropResponseJson, _ := json.Marshal(tableDropResponse)
+
+	sendCommandResponse(conn, command.Command, string(tableDropResponseJson))
+}

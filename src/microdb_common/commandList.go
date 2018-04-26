@@ -9,4 +9,5 @@ const (
 	DB_EXISTS_USE_DB = "DB_EXISTS_USE_DB"
 	DB_EXISTS        = "DB_EXISTS"
 	DROP_DB          = "DROP_DB"
+	DROP_TABLE       = "DROP_TABLE"
 )

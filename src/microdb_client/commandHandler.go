@@ -49,6 +49,12 @@ func commandParser(input string) microdbCommon.Command {
 		return parse_DROP_DB(input, dropDBRegex)
 	}
 
+	// Check if drop table
+	dropTableRegex, _ := regexp.Compile("^db\\.([a-zA-Z0-9]+)\\.drop\\(\\)$")
+	if dropTableRegex.MatchString(input) {
+		return parse_DROP_TABLE(input, dropTableRegex)
+	}
+
 	return microdbCommon.Command{}
 }
 
@@ -92,11 +98,18 @@ func parse_DB_EXISTS(input string, dBExistsRegex *regexp.Regexp) microdbCommon.C
 	return microdbCommon.CreateCommand(microdbCommon.DB_EXISTS, dbExistsParams)
 }
 
-func parse_DROP_DB(input string, dBExistsRegex *regexp.Regexp) microdbCommon.Command {
-	matches := dBExistsRegex.FindStringSubmatch(input)
+func parse_DROP_DB(input string, dropDBRegex *regexp.Regexp) microdbCommon.Command {
+	matches := dropDBRegex.FindStringSubmatch(input)
 	dbName := matches[1]
 	dropDbParams := microdbCommon.CmdDropDb{DB: dbName}
 	return microdbCommon.CreateCommand(microdbCommon.DROP_DB, dropDbParams)
+}
+
+func parse_DROP_TABLE(input string, dropTableRegex *regexp.Regexp) microdbCommon.Command {
+	matches := dropTableRegex.FindStringSubmatch(input)
+	tableName := matches[1]
+	dropTableParams := microdbCommon.CmdDropTable{DB: getDB(), TableName: tableName}
+	return microdbCommon.CreateCommand(microdbCommon.DROP_TABLE, dropTableParams)
 }
 
 func setDB(db string) {
