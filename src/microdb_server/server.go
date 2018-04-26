@@ -16,6 +16,7 @@ func main() {
 	connPort := config.ConnectionInfo.Port
 	connType := config.ConnectionInfo.ConnType
 
+	initLogger()
 	initDB()
 
 	var l, err = net.Listen(connType, connHost+":"+connPort)
@@ -25,7 +26,10 @@ func main() {
 	}
 
 	defer l.Close()
-	fmt.Println("MicroDB Server started... Listening at " + connHost + ":" + connPort)
+
+	startMessage := "MicroDB Server started... Listening at " + connHost + ":" + connPort
+	Log.Println(startMessage)
+	fmt.Println(startMessage)
 
 	setupServerInterruptHandler()
 	setupRequestHandler(l)

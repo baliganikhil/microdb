@@ -5,9 +5,8 @@ type Table struct {
 }
 
 type Database struct {
-	Name     string  `json:"name"`
-	IsActive bool    `json:"isActive"`
-	Tables   []Table `json:"tables"`
+	Name   string  `json:"name"`
+	Tables []Table `json:"tables"`
 }
 
 type DBInfo struct {

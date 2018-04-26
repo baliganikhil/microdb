@@ -14,7 +14,7 @@ func getCommand(cmdJSON string) microdbCommon.Command {
 	return c
 }
 
-func listDbs(conn net.Conn, command string) {
+func handle_SHOW_DBS(conn net.Conn, command microdbCommon.Command) {
 	dbs := getDBInfo().DBs
 	var dbList []string
 
@@ -26,10 +26,37 @@ func listDbs(conn net.Conn, command string) {
 	dbResponse := microdbCommon.DBListResponse{DBs: dbList}
 	dbListJson, _ := json.Marshal(dbResponse)
 
-	sendCommandResponse(conn, command, string(dbListJson))
+	sendCommandResponse(conn, command.Command, string(dbListJson))
 }
 
-func listTables(conn net.Conn, command microdbCommon.Command) {
+func handle_CREATE_DB(conn net.Conn, command microdbCommon.Command) {
+	dbInfo := getDBInfo()
+
+	var cmdCreateDB microdbCommon.CmdCreateDB
+	mapstructure.Decode(command.Params, &cmdCreateDB)
+
+	dbName := cmdCreateDB.DB
+	dbFound := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbFound = true
+		}
+	}
+
+	if !dbFound {
+		dbInfo.DBs = append(dbInfo.DBs, Database{Name: dbName})
+		setDBInfo(dbInfo)
+		sendCommandResponse(conn, command.Command, "Database "+dbName+" has been created")
+	} else {
+		sendCommandResponse(conn, command.Command, "Database "+dbName+" already exists")
+	}
+
+}
+
+func handle_SHOW_TABLES(conn net.Conn, command microdbCommon.Command) {
 	dbInfo := getDBInfo()
 	var tableList []string
 
@@ -53,7 +80,6 @@ func listTables(conn net.Conn, command microdbCommon.Command) {
 	tableResponse := microdbCommon.TableListResponse{Tables: tableList}
 	tableListJson, _ := json.Marshal(tableResponse)
 
-	// sendResponse(conn, strings.Join(tableList, "\n"))
 	sendCommandResponse(conn, command.Command, string(tableListJson))
 }
 
@@ -62,7 +88,7 @@ func useDB(conn net.Conn, params microdbCommon.Command) {
 	sendResponse(conn, dbName)
 }
 
-func createTable(conn net.Conn, command microdbCommon.Command) {
+func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 	var tableInfo microdbCommon.CmdCreateTable
 	mapstructure.Decode(command.Params, &tableInfo)
 
@@ -99,8 +125,90 @@ func createTable(conn net.Conn, command microdbCommon.Command) {
 	}
 
 	if !tableFound {
-		sendResponse(conn, "Table "+tableName+" has been successfully created")
+		sendCommandResponse(conn, command.Command, "Table "+tableName+" has been successfully created")
 	} else {
-		sendResponse(conn, "Table "+tableName+" already exists")
+		sendCommandResponse(conn, command.Command, "Table "+tableName+" already exists")
 	}
+}
+
+func handle_DB_EXISTS(conn net.Conn, command microdbCommon.Command) {
+	var cmdDbExists microdbCommon.CmdDBExists
+	mapstructure.Decode(command.Params, &cmdDbExists)
+
+	dbName := cmdDbExists.DB
+	dbInfo := getDBInfo()
+	dbFound := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbFound = true
+			break
+		}
+	}
+
+	dbExistsResponse := microdbCommon.DBExistsResponse{DB: dbName, Exists: dbFound}
+	dbExistsResponseJson, _ := json.Marshal(dbExistsResponse)
+
+	sendCommandResponse(conn, command.Command, string(dbExistsResponseJson))
+
+}
+
+func handle_DROP_DB(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropDb microdbCommon.CmdDropDb
+	mapstructure.Decode(command.Params, &cmdDropDb)
+
+	dbName := cmdDropDb.DB
+	dbInfo := getDBInfo()
+	dbDropped := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbInfo.DBs = append(dbInfo.DBs[0:dbIndex], dbInfo.DBs[dbIndex+1:]...)
+			dbDropped = true
+			setDBInfo(dbInfo)
+			break
+		}
+	}
+
+	dbDropResponse := microdbCommon.DropDBResponse{DB: dbName, Dropped: dbDropped}
+	dbDropResponseJson, _ := json.Marshal(dbDropResponse)
+
+	sendCommandResponse(conn, command.Command, string(dbDropResponseJson))
+}
+
+func handle_DROP_TABLE(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropTable microdbCommon.CmdDropTable
+	mapstructure.Decode(command.Params, &cmdDropTable)
+
+	dbName := cmdDropTable.DB
+	tableName := cmdDropTable.TableName
+	dbInfo := getDBInfo()
+	tableDropped := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+
+				if table.Name == tableName {
+					db.Tables = append(db.Tables[0:tableIndex], db.Tables[tableIndex+1:]...)
+					tableDropped = true
+					setDBInfo(dbInfo)
+					break
+				}
+
+			}
+		}
+	}
+
+	tableDropResponse := microdbCommon.DropTableResponse{DB: dbName, TableName: tableName, Dropped: tableDropped}
+	tableDropResponseJson, _ := json.Marshal(tableDropResponse)
+
+	sendCommandResponse(conn, command.Command, string(tableDropResponseJson))
 }

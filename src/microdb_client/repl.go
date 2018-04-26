@@ -30,6 +30,8 @@ func runRepl(conn net.Conn) {
 
 		if input == "exit" || input == "quit" {
 			cleanUpClientAndExit(conn)
+		} else if len(strings.TrimSpace(input)) == 0 {
+			// Do nothing
 		} else {
 			sendToServer(conn, commandParser(input).ToJson())
 		}
@@ -39,7 +41,7 @@ func runRepl(conn net.Conn) {
 }
 
 func printPrompt() {
-	fmt.Print("> ")
+	fmt.Print("μDB > ")
 }
 
 func printWelcome() {
@@ -53,12 +55,6 @@ func sendToServer(conn net.Conn, cmd string) {
 
 	message, _ := bufio.NewReader(conn).ReadString(Delimiter)
 	handleResponse(message)
-}
-
-func showTables(conn net.Conn) {
-	fmt.Println("Listing Tables")
-	fmt.Println("---------------")
-
 }
 
 func connectToServer() net.Conn {
