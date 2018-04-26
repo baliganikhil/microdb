@@ -154,3 +154,28 @@ func handle_DB_EXISTS(conn net.Conn, command microdbCommon.Command) {
 	sendCommandResponse(conn, command.Command, string(dbExistsResponseJson))
 
 }
+
+func handle_DROP_DB(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropDb microdbCommon.CmdDropDb
+	mapstructure.Decode(command.Params, &cmdDropDb)
+
+	dbName := cmdDropDb.DB
+	dbInfo := getDBInfo()
+	dbDropped := false
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			dbInfo.DBs = append(dbInfo.DBs[0:dbIndex], dbInfo.DBs[dbIndex+1:]...)
+			dbDropped = true
+			setDBInfo(dbInfo)
+			break
+		}
+	}
+
+	dbDropResponse := microdbCommon.DropDBResponse{DB: dbName, Dropped: dbDropped}
+	dbDropResponseJson, _ := json.Marshal(dbDropResponse)
+
+	sendCommandResponse(conn, command.Command, string(dbDropResponseJson))
+}

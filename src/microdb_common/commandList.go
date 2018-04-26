@@ -8,4 +8,5 @@ const (
 	CREATE_TABLE     = "CREATE_TABLE"
 	DB_EXISTS_USE_DB = "DB_EXISTS_USE_DB"
 	DB_EXISTS        = "DB_EXISTS"
+	DROP_DB          = "DROP_DB"
 )

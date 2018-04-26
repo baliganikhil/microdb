@@ -19,6 +19,8 @@ func handleResponse(responseIn string) {
 		show_DB_EXISTS_response(serverResponse)
 	} else if serverResponse.Command == microdbCommon.DB_EXISTS_USE_DB {
 		show_DB_EXISTS_USE_DB_response(serverResponse)
+	} else if serverResponse.Command == microdbCommon.DROP_DB {
+		show_DROP_DB_response(serverResponse)
 	} else {
 		fmt.Println(serverResponse.Response)
 	}
@@ -66,5 +68,16 @@ func show_DB_EXISTS_USE_DB_response(serverResponse microdbCommon.ServerResponse)
 		fmt.Println("DB '" + responseJSON.DB + "' is now active")
 	} else {
 		fmt.Println("DB '" + responseJSON.DB + "' does not exist")
+	}
+}
+
+func show_DROP_DB_response(serverResponse microdbCommon.ServerResponse) {
+	var responseJSON microdbCommon.DropDBResponse
+	json.Unmarshal([]byte(serverResponse.Response.(string)), &responseJSON)
+
+	if responseJSON.Dropped {
+		fmt.Println("DB '" + responseJSON.DB + "' has been dropped")
+	} else {
+		fmt.Println("DB '" + responseJSON.DB + "' could not be dropped")
 	}
 }

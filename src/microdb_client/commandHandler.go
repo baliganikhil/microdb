@@ -8,39 +8,45 @@ import (
 func commandParser(input string) microdbCommon.Command {
 
 	// Check if create db
-	createDBRegex, _ := regexp.Compile("create[ ]+db[ ]+([a-zA-Z0-9]+)")
+	createDBRegex, _ := regexp.Compile("^create[ ]+db[ ]+([a-zA-Z0-9]+)$")
 	if createDBRegex.MatchString(input) {
 		return parse_CREATE_DB(input, createDBRegex)
 	}
 
 	// Check if create table
-	createTableRegex, _ := regexp.Compile("db\\.([a-zA-Z0-9]+)\\.create\\(\\)")
+	createTableRegex, _ := regexp.Compile("^db\\.([a-zA-Z0-9]+)\\.create\\(\\)$")
 	if createTableRegex.MatchString(input) {
 		return parse_CREATE_TABLE(input, createTableRegex)
 	}
 
 	// Check if show dbs
-	showDBsRegex, _ := regexp.Compile("show[ ]+dbs")
+	showDBsRegex, _ := regexp.Compile("^show[ ]+dbs$")
 	if showDBsRegex.MatchString(input) {
 		return parse_SHOW_DBS(input, createTableRegex)
 	}
 
 	// Check if show tables
-	showTablesRegex, _ := regexp.Compile("show[ ]+tables")
+	showTablesRegex, _ := regexp.Compile("^show[ ]+tables$")
 	if showTablesRegex.MatchString(input) {
 		return parse_SHOW_TABLES(input, showTablesRegex)
 	}
 
 	// Check if use db
-	useDBRegex, _ := regexp.Compile("use[ ]+db[ ]+([a-zA-Z0-9]+)")
+	useDBRegex, _ := regexp.Compile("^use[ ]+db[ ]+([a-zA-Z0-9]+)$")
 	if useDBRegex.MatchString(input) {
 		return parse_DB_EXISTS_USE_DB(input, useDBRegex)
 	}
 
 	// Check if use db
-	dBExistsRegex, _ := regexp.Compile("db[ ]+([a-zA-Z0-9]+)")
+	dBExistsRegex, _ := regexp.Compile("^db[ ]+([a-zA-Z0-9]+)$")
 	if dBExistsRegex.MatchString(input) {
 		return parse_DB_EXISTS(input, dBExistsRegex)
+	}
+
+	// Check if drop db
+	dropDBRegex, _ := regexp.Compile("^drop[ ]+db[ ]+([a-zA-Z0-9]+)$")
+	if dropDBRegex.MatchString(input) {
+		return parse_DROP_DB(input, dropDBRegex)
 	}
 
 	return microdbCommon.Command{}
@@ -84,6 +90,13 @@ func parse_DB_EXISTS(input string, dBExistsRegex *regexp.Regexp) microdbCommon.C
 	dbName := matches[1]
 	dbExistsParams := microdbCommon.CmdDBExists{DB: dbName}
 	return microdbCommon.CreateCommand(microdbCommon.DB_EXISTS, dbExistsParams)
+}
+
+func parse_DROP_DB(input string, dBExistsRegex *regexp.Regexp) microdbCommon.Command {
+	matches := dBExistsRegex.FindStringSubmatch(input)
+	dbName := matches[1]
+	dropDbParams := microdbCommon.CmdDropDb{DB: dbName}
+	return microdbCommon.CreateCommand(microdbCommon.DROP_DB, dropDbParams)
 }
 
 func setDB(db string) {

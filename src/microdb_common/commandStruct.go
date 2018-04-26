@@ -15,6 +15,10 @@ type CmdListTables struct {
 	DB string `json:"db"`
 }
 
+type CmdDropDb struct {
+	DB string `json:"db"`
+}
+
 type CmdDBExists struct {
 	DB string `json:"db"`
 }
@@ -35,4 +39,9 @@ type TableListResponse struct {
 type DBExistsResponse struct {
 	DB     string `json:"db"`
 	Exists bool   `json:"exists"`
+}
+
+type DropDBResponse struct {
+	DB      string `json:"db"`
+	Dropped bool   `json:"dropped"`
 }
