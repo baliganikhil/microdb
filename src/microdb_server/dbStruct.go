@@ -1,7 +1,8 @@
 package main
 
 type Table struct {
-	Name string `json:"name"`
+	Name   string                 `json:"name"`
+	Schema map[string]interface{} `json:"schema"`
 }
 
 type Database struct {

@@ -1,10 +1,12 @@
 package microdbCommon
 
+// COMMANDS
 type CmdShowDbs struct{}
 
 type CmdCreateTable struct {
-	DB        string `json:"db"`
-	TableName string `json:"tableName"`
+	DB          string      `json:"db"`
+	TableName   string      `json:"tableName"`
+	TableSchema interface{} `json:"tableSchema"`
 }
 
 type CmdCreateDB struct {
@@ -28,6 +30,12 @@ type CmdDBExists struct {
 	DB string `json:"db"`
 }
 
+type CmdDescTable struct {
+	DB        string `json:"db"`
+	TableName string `json:"tableName"`
+}
+
+// RESPONSES
 type ServerResponse struct {
 	Command  string      `json:"command"`
 	Response interface{} `json:"response"`
@@ -55,4 +63,10 @@ type DropTableResponse struct {
 	DB        string `json:"db"`
 	TableName string `json:"tableName"`
 	Dropped   bool   `json:"dropped"`
+}
+
+type DescTableResponse struct {
+	DB        string                 `json:"db"`
+	TableName string                 `json:"tableName"`
+	Schema    map[string]interface{} `json:"schema"`
 }

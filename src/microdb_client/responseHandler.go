@@ -23,6 +23,8 @@ func handleResponse(responseIn string) {
 		show_DROP_DB_response(serverResponse)
 	} else if serverResponse.Command == microdbCommon.DROP_TABLE {
 		show_DROP_TABLE_response(serverResponse)
+	} else if serverResponse.Command == microdbCommon.DESC_TABLE {
+		show_DESC_TABLE_response(serverResponse)
 	} else {
 		fmt.Println(serverResponse.Response)
 	}
@@ -93,4 +95,13 @@ func show_DROP_TABLE_response(serverResponse microdbCommon.ServerResponse) {
 	} else {
 		fmt.Println("Table '" + responseJSON.TableName + "' could not be dropped")
 	}
+}
+
+func show_DESC_TABLE_response(serverResponse microdbCommon.ServerResponse) {
+	var responseJSON microdbCommon.DescTableResponse
+	json.Unmarshal([]byte(serverResponse.Response.(string)), &responseJSON)
+
+	indentedJson, _ := json.MarshalIndent(responseJSON.Schema, "", "\t")
+
+	fmt.Println(string(indentedJson))
 }

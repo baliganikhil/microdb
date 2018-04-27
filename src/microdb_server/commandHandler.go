@@ -94,6 +94,16 @@ func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 
 	dbName := tableInfo.DB
 	tableName := tableInfo.TableName
+	tableSchemaStr := tableInfo.TableSchema
+
+	var tableSchema map[string]interface{}
+	errTableSchema := json.Unmarshal([]byte(tableSchemaStr.(string)), &tableSchema)
+
+	// Check table schema
+	if errTableSchema != nil {
+		sendCommandResponse(conn, command.Command, "The table schema appears to be broken")
+		return
+	}
 
 	dbInfo := getDBInfo()
 	tableFound := false
@@ -113,7 +123,7 @@ func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 			}
 
 			if !tableFound {
-				db.Tables = append(db.Tables, Table{Name: tableName})
+				db.Tables = append(db.Tables, Table{Name: tableName, Schema: tableSchema})
 				setDBInfo(dbInfo)
 			}
 
@@ -211,4 +221,35 @@ func handle_DROP_TABLE(conn net.Conn, command microdbCommon.Command) {
 	tableDropResponseJson, _ := json.Marshal(tableDropResponse)
 
 	sendCommandResponse(conn, command.Command, string(tableDropResponseJson))
+}
+
+func handle_DESC_TABLE(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropTable microdbCommon.CmdDropTable
+	mapstructure.Decode(command.Params, &cmdDropTable)
+
+	dbName := cmdDropTable.DB
+	tableName := cmdDropTable.TableName
+	dbInfo := getDBInfo()
+	var tableSchema map[string]interface{}
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+
+				if table.Name == tableName {
+					tableSchema = table.Schema
+					break
+				}
+			}
+		}
+	}
+
+	tableDescResponse := microdbCommon.DescTableResponse{DB: dbName, TableName: tableName, Schema: tableSchema}
+	tableDescResponseJson, _ := json.Marshal(tableDescResponse)
+
+	sendCommandResponse(conn, command.Command, string(tableDescResponseJson))
+
 }
