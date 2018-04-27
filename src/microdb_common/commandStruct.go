@@ -3,8 +3,9 @@ package microdbCommon
 type CmdShowDbs struct{}
 
 type CmdCreateTable struct {
-	DB        string `json:"db"`
-	TableName string `json:"tableName"`
+	DB          string      `json:"db"`
+	TableName   string      `json:"tableName"`
+	TableSchema interface{} `json:"tableSchema"`
 }
 
 type CmdCreateDB struct {

@@ -14,7 +14,7 @@ func commandParser(input string) microdbCommon.Command {
 	}
 
 	// Check if create table
-	createTableRegex, _ := regexp.Compile("^db\\.([a-zA-Z0-9]+)\\.create\\(\\)$")
+	createTableRegex, _ := regexp.Compile("^db\\.([a-zA-Z0-9]+)\\.create\\((.*)\\)$")
 	if createTableRegex.MatchString(input) {
 		return parse_CREATE_TABLE(input, createTableRegex)
 	}
@@ -69,7 +69,8 @@ func parse_CREATE_DB(input string, createDBRegex *regexp.Regexp) microdbCommon.C
 func parse_CREATE_TABLE(input string, createTableRegex *regexp.Regexp) microdbCommon.Command {
 	matches := createTableRegex.FindStringSubmatch(input)
 	tableName := matches[1]
-	tableInfo := microdbCommon.CmdCreateTable{TableName: tableName, DB: getDB()}
+	tableSchema := matches[2]
+	tableInfo := microdbCommon.CmdCreateTable{TableName: tableName, DB: getDB(), TableSchema: tableSchema}
 
 	return microdbCommon.CreateCommand(microdbCommon.CREATE_TABLE, tableInfo)
 }

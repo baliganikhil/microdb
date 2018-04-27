@@ -94,6 +94,16 @@ func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 
 	dbName := tableInfo.DB
 	tableName := tableInfo.TableName
+	tableSchemaStr := tableInfo.TableSchema
+
+	var tableSchema map[string]interface{}
+	errTableSchema := json.Unmarshal([]byte(tableSchemaStr.(string)), &tableSchema)
+
+	// Check table schema
+	if errTableSchema != nil {
+		sendCommandResponse(conn, command.Command, "The table schema appears to be broken")
+		return
+	}
 
 	dbInfo := getDBInfo()
 	tableFound := false
@@ -113,7 +123,7 @@ func handle_CREATE_TABLE(conn net.Conn, command microdbCommon.Command) {
 			}
 
 			if !tableFound {
-				db.Tables = append(db.Tables, Table{Name: tableName})
+				db.Tables = append(db.Tables, Table{Name: tableName, Schema: tableSchema})
 				setDBInfo(dbInfo)
 			}
 
