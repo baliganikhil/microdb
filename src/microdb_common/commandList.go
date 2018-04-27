@@ -10,4 +10,5 @@ const (
 	DB_EXISTS        = "DB_EXISTS"
 	DROP_DB          = "DROP_DB"
 	DROP_TABLE       = "DROP_TABLE"
+	DESC_TABLE       = "DESC_TABLE"
 )

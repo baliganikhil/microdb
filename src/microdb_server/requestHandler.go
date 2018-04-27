@@ -43,6 +43,8 @@ func handleRequest(conn net.Conn) {
 			handle_DROP_DB(conn, c)
 		} else if microdbCommon.DROP_TABLE == c.Command {
 			handle_DROP_TABLE(conn, c)
+		} else if microdbCommon.DESC_TABLE == c.Command {
+			handle_DESC_TABLE(conn, c)
 		} else {
 			sendCommandResponse(conn, c.Command, "Unrecognised command")
 		}

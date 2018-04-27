@@ -55,6 +55,12 @@ func commandParser(input string) microdbCommon.Command {
 		return parse_DROP_TABLE(input, dropTableRegex)
 	}
 
+	// Describe table
+	descTableRegex, _ := regexp.Compile("^describe[ ]+table[ ]+([a-zA-Z0-9]+)$")
+	if descTableRegex.MatchString(input) {
+		return parse_DESC_TABLE(input, descTableRegex)
+	}
+
 	return microdbCommon.Command{}
 }
 
@@ -111,6 +117,13 @@ func parse_DROP_TABLE(input string, dropTableRegex *regexp.Regexp) microdbCommon
 	tableName := matches[1]
 	dropTableParams := microdbCommon.CmdDropTable{DB: getDB(), TableName: tableName}
 	return microdbCommon.CreateCommand(microdbCommon.DROP_TABLE, dropTableParams)
+}
+
+func parse_DESC_TABLE(input string, dropTableRegex *regexp.Regexp) microdbCommon.Command {
+	matches := dropTableRegex.FindStringSubmatch(input)
+	tableName := matches[1]
+	descTableParams := microdbCommon.CmdDescTable{DB: getDB(), TableName: tableName}
+	return microdbCommon.CreateCommand(microdbCommon.DESC_TABLE, descTableParams)
 }
 
 func setDB(db string) {

@@ -222,3 +222,34 @@ func handle_DROP_TABLE(conn net.Conn, command microdbCommon.Command) {
 
 	sendCommandResponse(conn, command.Command, string(tableDropResponseJson))
 }
+
+func handle_DESC_TABLE(conn net.Conn, command microdbCommon.Command) {
+	var cmdDropTable microdbCommon.CmdDropTable
+	mapstructure.Decode(command.Params, &cmdDropTable)
+
+	dbName := cmdDropTable.DB
+	tableName := cmdDropTable.TableName
+	dbInfo := getDBInfo()
+	var tableSchema map[string]interface{}
+
+	for dbIndex := range dbInfo.DBs {
+		db := &dbInfo.DBs[dbIndex]
+
+		if db.Name == dbName {
+			for tableIndex := range db.Tables {
+				table := &db.Tables[tableIndex]
+
+				if table.Name == tableName {
+					tableSchema = table.Schema
+					break
+				}
+			}
+		}
+	}
+
+	tableDescResponse := microdbCommon.DescTableResponse{DB: dbName, TableName: tableName, Schema: tableSchema}
+	tableDescResponseJson, _ := json.Marshal(tableDescResponse)
+
+	sendCommandResponse(conn, command.Command, string(tableDescResponseJson))
+
+}
