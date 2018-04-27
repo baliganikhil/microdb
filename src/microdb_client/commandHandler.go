@@ -56,7 +56,7 @@ func commandParser(input string) microdbCommon.Command {
 	}
 
 	// Describe table
-	descTableRegex, _ := regexp.Compile("^describe[ ]+table[ ]+([a-zA-Z0-9]+)$")
+	descTableRegex, _ := regexp.Compile("^db\\.([a-zA-Z0-9]+)\\.describe\\(\\)$")
 	if descTableRegex.MatchString(input) {
 		return parse_DESC_TABLE(input, descTableRegex)
 	}
