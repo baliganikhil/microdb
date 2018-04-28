@@ -11,4 +11,5 @@ const (
 	DROP_DB          = "DROP_DB"
 	DROP_TABLE       = "DROP_TABLE"
 	DESC_TABLE       = "DESC_TABLE"
+	SAVE_RECORD      = "SAVE_RECORD"
 )

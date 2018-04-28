@@ -253,3 +253,34 @@ func handle_DESC_TABLE(conn net.Conn, command microdbCommon.Command) {
 	sendCommandResponse(conn, command.Command, string(tableDescResponseJson))
 
 }
+
+func handle_SAVE_RECORD(conn net.Conn, command microdbCommon.Command) {
+	var cmdSaveRecord microdbCommon.CmdSaveRecord
+	mapstructure.Decode(command.Params, &cmdSaveRecord)
+
+	dbName := cmdSaveRecord.DB
+	tableName := cmdSaveRecord.TableName
+	recordInStr := cmdSaveRecord.Record
+
+	var recordIn map[string]interface{}
+	errRecordJSON := json.Unmarshal([]byte(recordInStr.(string)), &recordIn)
+
+	// Check table schema
+	if errRecordJSON != nil {
+		sendCommandResponse(conn, command.Command, "The table schema appears to be broken")
+		return
+	}
+
+	validatedRecord, validationError := validateRecordBeforeSave(recordIn, dbName, tableName)
+
+	if validationError != nil {
+		validationErrorJson, _ := json.Marshal(validationError)
+		sendCommandResponse(conn, command.Command, string(validationErrorJson))
+		return
+	}
+
+	saveRecordResponse := microdbCommon.SaveRecordResponse{HasError: false, DB: dbName, TableName: tableName, Record: validatedRecord.Data}
+	saveRecordResponseJson, _ := json.Marshal(saveRecordResponse)
+
+	sendCommandResponse(conn, command.Command, string(saveRecordResponseJson))
+}
