@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/rs/xid"
@@ -34,7 +35,11 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 		if reflect.TypeOf(keyInfo).Kind() == reflect.String {
 			reqdDatatype := keyInfo
 
-			val := recordIn[key]
+			val, recordHasValue := recordIn[key]
+			if !recordHasValue {
+				continue
+			}
+
 			valDataType := reflect.TypeOf(val).Kind()
 
 			if valDataType.String() != reqdDatatype {
@@ -46,6 +51,30 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 		} else {
 			// Complex information
 			// Complex object has been provided
+			var keyInfoMap map[string]interface{} = make(map[string]interface{})
+			keyInfoMap = keyInfo.(map[string]interface{})
+
+			val, recordHasValue := recordIn[key]
+			if !recordHasValue {
+				continue
+			}
+
+			// Check datatype
+			if reqdDatatype, hasDataTypeDef := keyInfoMap["type"]; hasDataTypeDef {
+				// reqdDatatype, hasDataTypeDef := keyInfoMap["type"]
+				valDataType := reflect.TypeOf(val).Kind()
+
+				if !hasDataTypeDef {
+					fmt.Println("Could not find value type for key: " + key)
+					continue
+				}
+
+				if valDataType.String() != reqdDatatype.(string) {
+					// Raise error
+					errorMessage := "Invalid data type for field: " + key + ". Required: " + reqdDatatype.(string) + ", Actual: " + valDataType.String()
+					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_TYPE_MISMATCH, ErrMessage: errorMessage}
+				}
+			}
 		}
 	}
 
