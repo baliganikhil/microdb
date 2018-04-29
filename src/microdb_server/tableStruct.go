@@ -7,7 +7,9 @@ type Record struct {
 type RecordValidationErrorType string
 
 const (
-	DATA_TYPE_MISMATCH RecordValidationErrorType = "DATA_TYPE_MISMATCH"
+	DATA_TYPE_MISMATCH     RecordValidationErrorType = "DATA_TYPE_MISMATCH"
+	DATA_LOWER_LIMIT_ERROR RecordValidationErrorType = "DATA_LOWER_LIMIT_ERROR"
+	DATA_UPPER_LIMIT_ERROR RecordValidationErrorType = "DATA_UPPER_LIMIT_ERROR"
 )
 
 type RecordValidationError struct {

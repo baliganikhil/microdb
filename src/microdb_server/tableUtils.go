@@ -75,6 +75,24 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_TYPE_MISMATCH, ErrMessage: errorMessage}
 				}
 			}
+
+			// Check lower limit
+			if lowerLimit, hasLowerLimitDef := keyInfoMap["lowerLimit"]; hasLowerLimitDef {
+				if val.(float64) < lowerLimit.(float64) {
+					// Raise error
+					errorMessage := "Invalid value for field: " + key + ". Lower Limit: " + FloatToString(lowerLimit.(float64)) + ", Actual: " + FloatToString(val.(float64))
+					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_LOWER_LIMIT_ERROR, ErrMessage: errorMessage}
+				}
+			}
+
+			// Check lower limit
+			if upperLimit, hasUpperLimitDef := keyInfoMap["upperLimit"]; hasUpperLimitDef {
+				if val.(float64) > upperLimit.(float64) {
+					// Raise error
+					errorMessage := "Invalid value for field: " + key + ". Upper Limit: " + FloatToString(upperLimit.(float64)) + ", Actual: " + FloatToString(val.(float64))
+					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_UPPER_LIMIT_ERROR, ErrMessage: errorMessage}
+				}
+			}
 		}
 	}
 
