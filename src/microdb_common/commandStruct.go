@@ -35,6 +35,12 @@ type CmdDescTable struct {
 	TableName string `json:"tableName"`
 }
 
+type CmdSaveRecord struct {
+	DB        string      `json:"db"`
+	TableName string      `json:"tableName"`
+	Record    interface{} `json:"record"`
+}
+
 // RESPONSES
 type ServerResponse struct {
 	Command  string      `json:"command"`
@@ -69,4 +75,11 @@ type DescTableResponse struct {
 	DB        string                 `json:"db"`
 	TableName string                 `json:"tableName"`
 	Schema    map[string]interface{} `json:"schema"`
+}
+
+type SaveRecordResponse struct {
+	HasError  bool                   `json:"error"`
+	DB        string                 `json:"db"`
+	TableName string                 `json:"tableName"`
+	Record    map[string]interface{} `json:"record"`
 }
