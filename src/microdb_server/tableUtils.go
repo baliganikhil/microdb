@@ -42,10 +42,28 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 
 			valDataType := reflect.TypeOf(val).Kind()
 
-			if valDataType.String() != reqdDatatype {
-				// Raise error
-				errorMessage := "Invalid data type for field: " + key + ". Required: " + reqdDatatype.(string) + ", Actual: " + valDataType.String()
-				return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_TYPE_MISMATCH, ErrMessage: errorMessage}
+			// Check datatype
+			if isStdDatatype(reqdDatatype.(string)) {
+				if valDataType.String() != reqdDatatype.(string) {
+					// Raise error
+					errorMessage := "Invalid data type for field: " + key + ". Required: " + reqdDatatype.(string) + ", Actual: " + valDataType.String()
+					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_TYPE_MISMATCH, ErrMessage: errorMessage}
+				}
+			} else {
+				// Custom data type
+				isValid, invalidErr, err := ValidateNonStdDatatypes(reqdDatatype.(string), key, val)
+				if err != nil {
+					return Record{}, err
+				}
+
+				if !isValid {
+					return Record{}, invalidErr
+				}
+			}
+
+			// Validate Email
+			if reqdDatatype.(string) == string(DATATYPE_EMAIL) && !ValidateEmail(val.(string)) {
+				return invalidEmail(key, val)
 			}
 
 		} else {
@@ -74,6 +92,11 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 					errorMessage := "Invalid data type for field: " + key + ". Required: " + reqdDatatype.(string) + ", Actual: " + valDataType.String()
 					return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_TYPE_MISMATCH, ErrMessage: errorMessage}
 				}
+
+				// Validate Email
+				if reqdDatatype.(string) == string(DATATYPE_EMAIL) && !ValidateEmail(val.(string)) {
+					return invalidEmail(key, val)
+				}
 			}
 
 			// Check lower limit
@@ -97,4 +120,9 @@ func validateRecordBeforeSave(recordIn map[string]interface{}, dbName string, ta
 	}
 
 	return Record{Data: recordIn}, nil
+}
+
+func invalidEmail(key string, val interface{}) (Record, error) {
+	errorMessage := "Invalid email address for key: " + key + " and value: " + val.(string)
+	return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_EMAIL_REGEX_MISMATCH, ErrMessage: errorMessage}
 }
