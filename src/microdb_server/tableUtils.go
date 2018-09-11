@@ -126,3 +126,7 @@ func invalidEmail(key string, val interface{}) (Record, error) {
 	errorMessage := "Invalid email address for key: " + key + " and value: " + val.(string)
 	return Record{}, &RecordValidationError{HasError: true, Field: key, ErrType: DATA_EMAIL_REGEX_MISMATCH, ErrMessage: errorMessage}
 }
+
+func SaveRecord() {
+
+}

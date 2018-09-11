@@ -32,23 +32,23 @@ func (e *RecordValidationError) Error() string {
 
 func isStdDatatype(datatypeIn string) bool {
 	switch datatypeIn {
-	case "bool":
-	case "string":
-	case "int":
-	case "int8":
-	case "int16":
-	case "int32":
-	case "int64":
-	case "uint":
-	case "uint8":
-	case "uint16":
-	case "uint32":
-	case "uint64":
-	case "byte":
-	case "float32":
-	case "float64":
-	case "complex64":
-	case "complex128":
+	case "bool",
+		"string",
+		"int",
+		"int8",
+		"int16",
+		"int32",
+		"int64",
+		"uint",
+		"uint8",
+		"uint16",
+		"uint32",
+		"uint64",
+		"byte",
+		"float32",
+		"float64",
+		"complex64",
+		"complex128":
 		return true
 	}
 
