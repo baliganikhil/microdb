@@ -279,6 +279,9 @@ func handle_SAVE_RECORD(conn net.Conn, command microdbCommon.Command) {
 		return
 	}
 
+	// Actually save the record
+	SaveRecord()
+
 	saveRecordResponse := microdbCommon.SaveRecordResponse{HasError: false, DB: dbName, TableName: tableName, Record: validatedRecord.Data}
 	saveRecordResponseJson, _ := json.Marshal(saveRecordResponse)
 

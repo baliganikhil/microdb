@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	Delimiter = '\r'
+	_client_version = "1.0.0"
+	Delimiter       = '\r'
 )
 
 var curDBName = "test"
@@ -30,6 +31,8 @@ func runRepl(conn net.Conn) {
 
 		if input == "exit" || input == "quit" {
 			cleanUpClientAndExit(conn)
+		} else if input == "version" {
+			fmt.Println(_client_version)
 		} else if len(strings.TrimSpace(input)) == 0 {
 			// Do nothing
 		} else {
